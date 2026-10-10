@@ -9,6 +9,9 @@ assert src.count(mark) == 1
 s = src.replace(mark, app + '\n' + mark)
 # Hinweise aus dem Prototyp, die in der App nicht mehr stimmen
 s = s.replace('Tippen zum Sprechen · im Prototyp wird dein Satz vorgespielt', 'Tippen zum Sprechen')
+old = 'Prototyp. Sprechen wird vorgespielt. Tippen geht über das Tastatur-Symbol unten links, dort antwortet die KI wirklich. Alle Zeiten, Preise und Lokale sind Beispiele.'
+assert old in s
+s = s.replace(old, 'Gestalte zuerst deinen eigenen Buddy. Danach sind Uhrzeit, Ort und Wetter echt. Der Beispieltag ist eine Vorführung mit ausgedachten Zeiten und Orten.')
 assert s.startswith('<title>')
 head = ('<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n'
   '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'

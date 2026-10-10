@@ -9,9 +9,13 @@ function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(
 function tick(){ if (LIVE) return; var n = new Date();
   $('clk').textContent = n.toLocaleTimeString('de-AT', { hour:'numeric', minute:'2-digit' });
   $('clkd').textContent = n.toLocaleDateString('de-AT', { weekday:'long', day:'numeric', month:'long' }) + (REAL.ort && REAL.ort.ort ? ' · ' + REAL.ort.ort : ''); }
-var setClockDemo = setClock;
-setClock = function(c){ if (LIVE) return setClockDemo(c); tick(); };
-setInterval(tick, 15000);
+var setClockDemo = setClock, LASTWO = '';
+/* In Vorführungen (Beispieltag, Situationen) steht dazu, dass Zeit und Ort ausgedacht sind. */
+setClock = function(c){ if (LIVE) return setClockDemo(c && [c[0], String(c[1]).split(' · ')[0] + ' · Beispiel']); tick(); };
+setInterval(function(){ tick(); var wo = (J.me && J.me.wo) || ''; if (!REAL.ort && wo && wo !== LASTWO) { LASTWO = wo; ortLoad(); } }, 15000);
+/* Startseite: zuerst den eigenen Buddy gestalten, der Beispieltag ist klar als Vorführung erkennbar. */
+var applyNameBase = applyName;
+applyName = function(){ applyNameBase(); var gd = $('go-day'); if (gd) gd.textContent = 'Beispieltag ansehen (Vorführung)'; };
 
 /* Ort: genau übers Handy, wenn erlaubt, sonst der Wohnort aus dem Kennenlernen. */
 function ortSet(o){ if (!o || o.lat == null) return; REAL.ort = o; lsSet('ida.ort', o); if (o.ort) WXD.ort = o.ort; tick(); wxLoad(); }
