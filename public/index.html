@@ -2821,10 +2821,32 @@ speak = function(t){
     .catch(function(){ if (my !== ttsN) return; app.classList.remove('speaking'); speakBrowser(t); });
 };
 
+/* Ohne ElevenLabs hört die Spracherkennung des Handys zu. Gibt es die nicht, geht die Tastatur auf, nie ein vorgespielter Satz. */
+var SR = null;
+function typeInstead(msg){ $('app').classList.remove('listening'); $('you').hidden = true; $('st').textContent = J.name; $('ctrl').hidden = true; $('typer').hidden = false; $('tin').focus(); if (msg) toast(msg); }
+function listenPhone(){
+  var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!R) return typeInstead('Zuhören geht auf diesem Gerät noch nicht. Tipp einfach, ich lese mit.');
+  if (SR) { try { SR.stop(); } catch(e) {} return; }
+  shutUp(); liveStop();
+  var app = $('app'), got = '', r = new R(); SR = r;
+  r.lang = 'de-AT'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+  app.classList.add('listening'); app.classList.remove('ear'); $('st').textContent = J.name + ' hört zu';
+  $('you').hidden = false; $('you').textContent = 'Sprich einfach. Wenn du still bist, antworte ich.';
+  r.onresult = function(e){ var t = ''; for (var i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; got = t.trim(); if (got) $('you').textContent = 'Du: „' + got + ' …“'; };
+  r.onerror = function(e){ SR = null; app.classList.remove('listening');
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') typeInstead('Ich darf das Mikrofon nicht benutzen. Erlaube es in den Einstellungen, oder tipp einfach.');
+    else if (e.error !== 'no-speech' && e.error !== 'aborted') typeInstead('Ich hab dich gerade nicht verstanden. Tipp es mir einfach.'); };
+  r.onend = function(){ SR = null; app.classList.remove('listening');
+    if (got) route(stripWake(got)); else { $('you').hidden = true; $('st').textContent = J.name; } };
+  try { r.start(); } catch(e) { SR = null; typeInstead('Zuhören geht gerade nicht. Tipp einfach, ich lese mit.'); }
+}
+
 /* Zuhören: aufnehmen, bis du still bist, dann schreibt ElevenLabs mit und Claude räumt den Satz auf. */
 var REC = null, listenDemo = listen;
 listen = function(){
-  if (!APPV.ear || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return listenDemo();
+  if (LIVE) return listenDemo();
+  if (!APPV.ear || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return listenPhone();
   if (REC) { if (REC.state === 'recording') REC.stop(); return; }
   shutUp(); liveStop();
   var app = $('app');
