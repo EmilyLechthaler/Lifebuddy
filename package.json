@@ -1,0 +1,17 @@
+{
+  "name": "ida",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ida, die Life Buddy Web-App: Claude denkt, ElevenLabs spricht und hört zu.",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "probe": "MOCK=1 node server.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "express": "^5.1.0"
+  }
+}
