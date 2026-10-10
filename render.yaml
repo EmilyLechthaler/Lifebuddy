@@ -16,5 +16,7 @@ services:
         sync: false
       - key: APP_PASSWORD
         sync: false
+      - key: CALENDAR_ICS_URL
+        sync: false
       - key: CLAUDE_MODEL
         value: claude-opus-5-5

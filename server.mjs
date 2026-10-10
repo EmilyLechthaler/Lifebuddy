@@ -5,6 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
+import { liveRoutes, liveInfo } from "./live.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -37,7 +38,7 @@ function brake(req, res, next) {
 }
 
 app.get("/api/ping", (req, res) => {
-  res.json({ ok: true, password: !!APP_PASSWORD, ai: !!claude || MOCK, voice: !!ELEVEN_KEY && !!VOICE_ID, ear: !!ELEVEN_KEY || MOCK });
+  res.json({ ok: true, password: !!APP_PASSWORD, ai: !!claude || MOCK, voice: !!ELEVEN_KEY && !!VOICE_ID, ear: !!ELEVEN_KEY || MOCK, ...liveInfo() });
 });
 
 app.post("/api/check", express.json(), (req, res) => {
@@ -175,6 +176,8 @@ app.post("/api/stt", guard, brake, express.raw({ type: () => true, limit: "15mb"
     res.status(502).json({ code: "ear_failed" });
   }
 });
+
+liveRoutes(app, { guard, brake, MOCK });
 
 app.use(express.static(path.join(here, "public"), { extensions: ["html"], setHeaders: (res, p) => { if (p.endsWith(".html")) res.setHeader("cache-control", "no-cache"); } }));
 
